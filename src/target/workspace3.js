@@ -10,8 +10,6 @@ const cliProgress = require('cli-progress');
 const mime = require('mime-types');
 const archiver = require('archiver');
 
-// Node.js 18+ has fetch built-in, no need to import
-
 // Validate UUID format
 const validateUUID = (input) => {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -26,7 +24,7 @@ const validateEmail = (input) => {
 
 const workspace3 = {
   // ===========================================
-  // CONFIGURATION QUESTIONS
+  // QUESTIONS
   // ===========================================
   questions: [
     {
@@ -36,7 +34,7 @@ const workspace3 = {
       errorMessage: 'Missing email',
       validate: validateEmail,
       required: true,
-      save: false,  // No guardar email en .uploadrc
+      save: false, 
     },
     {
       type: 'password',
@@ -46,7 +44,7 @@ const workspace3 = {
       validate: validateNotEmpty,
       required: true,
       mask: '*',
-      save: false,  // No guardar password en .uploadrc
+      save: false, 
     },
     {
       type: 'input',
@@ -56,7 +54,6 @@ const workspace3 = {
       errorMessage: 'Missing folder ID',
       validate: validateUUID,
       required: true,
-      // folderId sí se puede guardar (menos sensible)
     },
     {
       type: 'input',
@@ -65,14 +62,12 @@ const workspace3 = {
       default: 'workspace.monks.tools',
       validate: validateNotEmpty,
       required: true,
-      // host sí se puede guardar
     },
     {
       type: 'confirm',
       name: 'addComments',
       message: 'Add automatic comments after file upload?',
       default: false,
-      // addComments sí se puede guardar
     },
     {
       type: 'input',
@@ -80,7 +75,6 @@ const workspace3 = {
       message: 'Enter comment text (or press Enter for default):',
       default: 'Asset uploaded via Display-Upload Tool',
       when: (answers) => answers.addComments === true,
-      // commentText sí se puede guardar
     },
   ],
 

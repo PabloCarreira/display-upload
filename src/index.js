@@ -144,15 +144,40 @@ module.exports = async (options = {}, cli) => {
   // checking if inputDir exist
   targetData = await conditionalPrompt(targetData, target.questions);
 
+  // **🔒 NEW FUNCTION TO EXCLUDE SENSITIVE INFORMATION FROM UPLOADRC 🔒**
+
+  function filterSensitiveData(targetData, questions) {
+    const filteredData = {};
+    
+    questions.forEach(question => {
+      // Save the question if it is not sensitive
+      if (question.save !== false && targetData.hasOwnProperty(question.name)) {
+        filteredData[question.name] = targetData[question.name];
+      }
+    });
+    
+    // Always save the type
+    filteredData.type = targetData.type;
+    
+    // Keep inputDir and outputDir if they are not sensitive
+    if (targetData.inputDir) filteredData.inputDir = targetData.inputDir;
+    if (targetData.outputDir) filteredData.outputDir = targetData.outputDir;
+    
+    return filteredData;
+  }
+
+  // **🔒 Create copy of filtered data inputs 🔒**
+  const dataToSave = filterSensitiveData(targetData, target.questions);
+
   // find and overwrite the correct object in the array data.uploadConfigs
   const overwriteIndex = data.uploadConfigs.findIndex((config => config.type === targetData.type));
 
   if (overwriteIndex === -1) {
     //console.log("adding new object to data")
-    data.uploadConfigs.push(targetData); //this config was not in the uploadrc yet so adding a new object
+    data.uploadConfigs.push(dataToSave); //this config was not in the uploadrc yet so adding a new object
   }
   else {
-    data.uploadConfigs[overwriteIndex] = targetData; //found it, so overwriting the existing object
+    data.uploadConfigs[overwriteIndex] = dataToSave; //found it, so overwriting the existing object
   }
 
   await fs.writeJSON(filepathRc, data, {spaces: 2})
