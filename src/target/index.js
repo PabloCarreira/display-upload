@@ -4,7 +4,7 @@ module.exports = {
 	doubleclick: require("./doubleclick.js"),
 	sftp: require("./sftp.js"),
 	adform: require("./adform.js"),
-	// workspace: require("./workspace.js"),
+	workspace: require("./workspace3.js"),
 	//monet: require("./monet.js"),
 	//ftp: require("./ftp.js"),
 };

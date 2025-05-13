@@ -84,7 +84,7 @@ module.exports = async (options = {}, cli) => {
   }
 
   else {
-    console.log('uploadrc doesnt exist, creating creating new data obj')
+    console.log('uploadrc doesnt exist, creating new data obj')
     data = {
       uploadConfigs: []
     }
@@ -93,7 +93,7 @@ module.exports = async (options = {}, cli) => {
   const choices = [
     {name: 'Mediamonks Preview', value: 'mm-preview'},
     {name: 'Adform', value: 'adform'},
-    // { name: 'Workspace', value: 'workspace' },
+    {name: 'Workspace', value: 'workspace'},
     {name: 'Flashtalking', value: 'flashtalking'},
     {name: 'Google DoubleClick Studio', value: 'doubleclick'},
     {name: 'SFTP (alpha)', value: 'sftp'},
@@ -115,6 +115,7 @@ module.exports = async (options = {}, cli) => {
     choices: choices,
   });
 
+  console.log(chalk.blue(`You selected ${uploadTarget.type}`));
   const target = targets[uploadTarget.type];
 
   if (!target) {
