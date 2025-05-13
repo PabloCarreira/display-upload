@@ -1,6 +1,6 @@
 {
   "name": "@mediamonks/display-upload",
-  "version": "1.6.5",
+  "version": "1.7.0",
   "description": "Display.Monks upload tool. Uploads ad files to various platforms and vendors.",
   "main": "./src/index.js",
   "scripts": {
