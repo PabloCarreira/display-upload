@@ -31,6 +31,7 @@ const workspace3 = {
       type: 'input',
       name: 'email',
       message: 'Please fill in your Workspace3 email:',
+      default: process.env.WS3_EMAIL,
       errorMessage: 'Missing email',
       validate: validateEmail,
       required: true,
@@ -40,6 +41,7 @@ const workspace3 = {
       type: 'password',
       name: 'password',
       message: 'Please fill in your Workspace3 password:',
+      default: process.env.WS3_PASSWORD,
       errorMessage: 'Missing password',
       validate: validateNotEmpty,
       required: true,
@@ -59,23 +61,22 @@ const workspace3 = {
       type: 'input',
       name: 'host',
       message: 'Please fill in the Workspace3 host (or press Enter for default):',
-      default: 'workspace.monks.tools',
+      default: process.env.WS3_HOST || 'workspace.monks.tools',
       validate: validateNotEmpty,
       required: true,
     },
     {
       type: 'confirm',
       name: 'addComments',
-      message: 'Add automatic comments after file upload?',
-      default: false,
+      message: 'Would you like to add a comment after file upload?',
+      save: false,
     },
     {
-      type: 'input',
-      name: 'commentText',
-      message: 'Enter comment text (or press Enter for default):',
-      default: 'Asset uploaded via Display-Upload Tool',
-      when: (answers) => answers.addComments === true,
-    },
+    type: 'input',
+    name: 'commentText',
+    message: 'Enter your comment (leave empty for default message):',
+    when: (answers) => answers.addComments
+    }
   ],
 
   // ===========================================
@@ -290,7 +291,6 @@ const workspace3 = {
 
   /**
    * Check if a folder is a React application folder
-   * This is a heuristic - you can adjust the logic based on your build structure
    */
   async isReactAppFolder(folderPath) {
     // Check for typical React app files/folders
@@ -319,6 +319,39 @@ const workspace3 = {
     
     return false;
   },
+
+  /**
+   * Extract version number from asset version response
+   * Tries to get it from the response or generates a timestamp-based number
+   */
+  extractVersionNumber(assetVersion) {
+    // Try to extract version from the response
+    if (assetVersion && assetVersion.attributes) {
+      // Look for version in various possible fields
+      if (assetVersion.attributes.version) {
+        return assetVersion.attributes.version;
+      }
+      if (assetVersion.attributes.versionNumber) {
+        return assetVersion.attributes.versionNumber;
+      }
+      // Sometimes version is just the ID
+      if (assetVersion.id) {
+        // Extract number from ID if it contains one
+        const match = assetVersion.id.match(/\d+$/);
+        if (match) return match[0];
+      }
+    }
+    
+    // Fallback: generate version based on timestamp
+    const now = new Date();
+    const timestamp = now.getFullYear().toString().slice(-2) + 
+                     String(now.getMonth() + 1).padStart(2, '0') + 
+                     String(now.getDate()).padStart(2, '0') + 
+                     String(now.getHours()).padStart(2, '0') + 
+                     String(now.getMinutes()).padStart(2, '0');
+    return timestamp;
+  },
+
 
   // ===========================================
   // ZIP CREATION FUNCTIONS
@@ -383,8 +416,8 @@ const workspace3 = {
     
     if (bannerFolders.length === 0) {
       console.log('❌ No banner folders detected (folders with index.html)');
-      console.log('   Make sure your input directory contains banner folders with index.html files');
-      console.log('   React app folders are automatically filtered out');
+      console.log('Make sure your input directory contains banner folders with index.html files');
+      console.log('React app folders are automatically filtered out');
       return;
     }
     
@@ -447,8 +480,15 @@ const workspace3 = {
             
             // 4. Add comment if enabled
             if (data.addComments) {
-              const commentText = `${data.commentText} - Banner: ${originalFolder.name}`;
-              await apiClient.addComment(assetVersion.id, commentText);
+                console.log(`📝 Adding comment for ${name}`);
+                const defaultComment = `${name} uploaded via Display-Upload Tool`;
+                
+                // More explicit comment text handling
+                const commentText = typeof data.commentText === 'string' && data.commentText.trim() 
+                    ? data.commentText.trim() 
+                    : defaultComment;
+                
+                await apiClient.addComment(assetVersion.id, commentText);
             }
 
             uploadResults.push({

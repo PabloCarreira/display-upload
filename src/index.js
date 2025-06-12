@@ -144,6 +144,18 @@ module.exports = async (options = {}, cli) => {
   // checking if inputDir exist
   targetData = await conditionalPrompt(targetData, target.questions);
 
+  // Add comment handling after the main prompts
+  if (targetData.addComments === true) {
+    const commentPrompt = await inquirer.prompt({
+      type: 'input',
+      name: 'commentText',
+      message: 'Enter your comment (leave empty for default message):',
+    });
+  
+  // Merge the comment text into targetData
+  targetData.commentText = commentPrompt.commentText;
+}
+
   // **🔒 NEW FUNCTION TO EXCLUDE SENSITIVE INFORMATION FROM UPLOADRC 🔒**
 
   function filterSensitiveData(targetData, questions) {
